@@ -11,23 +11,25 @@ import java.util.UUID;
 @Table(name="sessions")
 public class Session {
     @Id
-    @GeneratedValue(strategy= GenerationType.UUID)
-    @Column(name="id", updatable=false, nullable=false)
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
-    @ManyToOne(mappedBy="gameList", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
-    private List<Game> games;
 
-    @Column(name="start_time", nullable=false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "game_id", nullable = false)
+    private Game game;
+
+    @Column(name = "start_time", nullable = false)
     private LocalDateTime startTime;
-    @Column(name="end_time" , nullable=false)
+    @Column(name = "end_time", nullable = false)
     private LocalDateTime endTime;
 
     public Session() {
     }
 
-    public Session(UUID id, List<Game> games, LocalDateTime startTime, LocalDateTime endTime) {
+    public Session(UUID id, Game game, LocalDateTime startTime, LocalDateTime endTime) {
         this.id = id;
-        this.games = games;
+        this.game = game;
         this.startTime = startTime;
         this.endTime = endTime;
     }
@@ -40,12 +42,12 @@ public class Session {
         this.id = id;
     }
 
-    public List<Game> getGames() {
-        return games;
+    public Game getGame() {
+        return game;
     }
 
-    public void setGames(List<Game> games) {
-        this.games = games;
+    public void setGame(Game game) {
+        this.game = game;
     }
 
     public LocalDateTime getStartTime() {
@@ -68,19 +70,19 @@ public class Session {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Session session = (Session) o;
-        return Objects.equals(id, session.id) && Objects.equals(games, session.games) && Objects.equals(startTime, session.startTime) && Objects.equals(endTime, session.endTime);
+        return Objects.equals(id, session.id) && Objects.equals(game, session.game) && Objects.equals(startTime, session.startTime) && Objects.equals(endTime, session.endTime);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, games, startTime, endTime);
+        return Objects.hash(id, game, startTime, endTime);
     }
 
     @Override
     public String toString() {
         return "Session{" +
                 "id=" + id +
-                ", games=" + games +
+                ", game=" + game +
                 ", startTime=" + startTime +
                 ", endTime=" + endTime +
                 '}';

@@ -2,6 +2,7 @@ package com.oipithesecond.glboot.domain.entities;
 
 import jakarta.persistence.*;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -22,19 +23,19 @@ public class Game {
     @Column(name = "status")
     private GameStatus status;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "task_list_id")
-    private Session gameList;
+
+    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Session> sessions;
 
     public Game() {
     }
 
-    public Game(UUID id, String title, String description, GameStatus status, Session gameList) {
+    public Game(UUID id, String title, String description, GameStatus status, List<Session> sessions) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.status = status;
-        this.gameList = gameList;
+        this.sessions = sessions;
     }
 
     public UUID getId() {
@@ -69,24 +70,24 @@ public class Game {
         this.status = status;
     }
 
-    public Session getGameList() {
-        return gameList;
+    public List<Session> getSessions() {
+        return sessions;
     }
 
-    public void setGameList(Session gameList) {
-        this.gameList = gameList;
+    public void setSessions(List<Session> sessions) {
+        this.sessions = sessions;
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Game game = (Game) o;
-        return Objects.equals(id, game.id) && Objects.equals(title, game.title) && Objects.equals(description, game.description) && status == game.status && Objects.equals(gameList, game.gameList);
+        return Objects.equals(id, game.id) && Objects.equals(title, game.title) && Objects.equals(description, game.description) && status == game.status && Objects.equals(sessions, game.sessions);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, description, status, gameList);
+        return Objects.hash(id, title, description, status, sessions);
     }
 
     @Override
@@ -96,7 +97,7 @@ public class Game {
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
                 ", status=" + status +
-                ", gameList=" + gameList +
+                ", sessions=" + sessions +
                 '}';
     }
 }
