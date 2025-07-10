@@ -7,4 +7,5 @@ import java.util.UUID;
 
 public interface GameService {
     List<Game> listGame();
+    Game createGame(Game game);
 }

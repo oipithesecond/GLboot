@@ -1,11 +1,10 @@
 package com.oipithesecond.glboot.controllers;
 
 import com.oipithesecond.glboot.domain.dto.GameDTO;
+import com.oipithesecond.glboot.domain.entities.Game;
 import com.oipithesecond.glboot.mappers.GameMapper;
 import com.oipithesecond.glboot.services.GameService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -28,4 +27,12 @@ public class GameController {
                 .map(gameMapper::toDto)
                 .toList();
     }
+
+    @PostMapping
+    public GameDTO createGame(@RequestBody GameDTO gameDTO) {
+        Game createdGame = gameService.createGame(
+                gameMapper.fromDto(gameDTO));
+        return gameMapper.toDto(createdGame);
+    }
+
 }

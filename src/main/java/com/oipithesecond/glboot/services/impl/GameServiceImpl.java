@@ -19,4 +19,22 @@ public class GameServiceImpl implements GameService {
     public List<Game> listGame() {
         return gameRepository.findAll();
     }
+
+    @Override
+    public Game createGame(Game game) {
+        if(null != game.getId()) {
+            throw new IllegalArgumentException("Game already exists");
+        }
+        if(null == game.getTitle() || game.getTitle().isBlank()) {
+            throw new IllegalArgumentException("Game title is required");
+        }
+
+        return gameRepository.save(new Game(
+                null,
+                game.getTitle(),
+                game.getDescription(),
+                null,
+                null
+        ));
+    }
 }
