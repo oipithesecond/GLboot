@@ -7,6 +7,8 @@ import com.oipithesecond.glboot.services.GameService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping(path = "/games")
@@ -33,6 +35,12 @@ public class GameController {
         Game createdGame = gameService.createGame(
                 gameMapper.fromDto(gameDTO));
         return gameMapper.toDto(createdGame);
+    }
+
+    @GetMapping(path="/{game_id}")
+    public Optional<GameDTO> getGame(@PathVariable("game_id") UUID gameId) {
+        return gameService.getGame(gameId)
+                .map(gameMapper::toDto);
     }
 
 }

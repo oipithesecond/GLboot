@@ -6,6 +6,9 @@ import com.oipithesecond.glboot.services.GameService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 @Service
 public class GameServiceImpl implements GameService {
 
@@ -36,5 +39,10 @@ public class GameServiceImpl implements GameService {
                 null,
                 null
         ));
+    }
+
+    @Override
+    public Optional<Game> getGame(UUID id) {
+        return gameRepository.findById(id);
     }
 }
