@@ -11,4 +11,5 @@ public interface SessionService {
     Session createSession(UUID gameid, Session session);
     Optional<Session> getSession(UUID gameid, UUID id);
     Session updateSession(UUID gameid, UUID id, Session session);
+    void deleteSession(UUID gameid, UUID id);
 }

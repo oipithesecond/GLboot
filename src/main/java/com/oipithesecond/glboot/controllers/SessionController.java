@@ -64,4 +64,13 @@ public class SessionController {
         );
         return sessionMapper.toDto(updatedSession);
     }
+
+    @DeleteMapping(path="/{session_id}")
+    public void deleteSession(
+            @PathVariable("game_id") UUID gameid,
+            @PathVariable("session_id") UUID sessionid
+    ){
+        sessionService.deleteSession(gameid, sessionid);
+    }
+
 }

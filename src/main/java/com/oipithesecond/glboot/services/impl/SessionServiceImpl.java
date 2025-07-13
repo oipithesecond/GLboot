@@ -6,6 +6,7 @@ import com.oipithesecond.glboot.repositories.GameRepository;
 import com.oipithesecond.glboot.repositories.SessionRepository;
 import com.oipithesecond.glboot.services.SessionService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,6 +30,7 @@ public class SessionServiceImpl implements SessionService {
         return sessionRepository.findByGame_Id(gameid);
     }
 
+    @Transactional
     @Override
     public Session createSession(UUID gameid, Session session) {
         if(null!= session.getId()){
@@ -54,6 +56,7 @@ public class SessionServiceImpl implements SessionService {
         return sessionRepository.findByGame_IdAndId(gameid, id);
     }
 
+    @Transactional
     @Override
     public Session updateSession(UUID gameid, UUID id, Session session) {
         if(null == session.getId()){
@@ -69,5 +72,11 @@ public class SessionServiceImpl implements SessionService {
         existingSession.setEndTime(session.getEndTime());
 
         return sessionRepository.save(existingSession);
+    }
+
+    @Transactional
+    @Override
+    public void deleteSession(UUID gameid, UUID id) {
+        sessionRepository.deleteByGame_IdAndId(gameid,id);
     }
 }

@@ -4,6 +4,7 @@ import com.oipithesecond.glboot.domain.entities.Game;
 import com.oipithesecond.glboot.repositories.GameRepository;
 import com.oipithesecond.glboot.services.GameService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -47,6 +48,7 @@ public class GameServiceImpl implements GameService {
         return gameRepository.findById(id);
     }
 
+    @Transactional
     @Override
     public Game updateGame(UUID id, Game game) {
         if(null == game.getId()) {
