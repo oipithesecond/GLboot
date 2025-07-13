@@ -9,6 +9,7 @@ import com.oipithesecond.glboot.services.SessionService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -40,5 +41,27 @@ public class SessionController {
                 sessionMapper.fromDto(sessiondto)
         );
         return sessionMapper.toDto(createdSession);
+    }
+
+    @GetMapping(path="/{session_id}")
+    public Optional<SessionDTO> getSessionbyid(
+            @PathVariable("game_id") UUID gameid,
+            @PathVariable("session_id") UUID sessionid
+    ) {
+        return sessionService.getSession(gameid, sessionid).map(sessionMapper::toDto);
+    }
+
+    @PutMapping(path="/{session_id}")
+    public SessionDTO updateSession(
+            @PathVariable("game_id") UUID gameid,
+            @PathVariable("session_id") UUID sessionid,
+            @RequestBody SessionDTO sessionDto
+    ){
+        Session updatedSession = sessionService.updateSession(
+                gameid,
+                sessionid,
+                sessionMapper.fromDto(sessionDto)
+        );
+        return sessionMapper.toDto(updatedSession);
     }
 }

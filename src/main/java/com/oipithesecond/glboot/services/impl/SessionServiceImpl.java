@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -45,5 +47,27 @@ public class SessionServiceImpl implements SessionService {
         );
 
         return sessionRepository.save(sessionToSave);
+    }
+
+    @Override
+    public Optional<Session> getSession(UUID gameid, UUID id) {
+        return sessionRepository.findByGame_IdAndId(gameid, id);
+    }
+
+    @Override
+    public Session updateSession(UUID gameid, UUID id, Session session) {
+        if(null == session.getId()){
+            throw new IllegalStateException("session already exists");
+        }
+        if(!Objects.equals(id,session.getId())){
+            throw new IllegalStateException("session id does not match");
+        }
+        Session existingSession = sessionRepository.findByGame_IdAndId(gameid,id)
+                .orElseThrow(() -> new IllegalStateException("session not found"));
+
+        existingSession.setStartTime(session.getStartTime());
+        existingSession.setEndTime(session.getEndTime());
+
+        return sessionRepository.save(existingSession);
     }
 }
