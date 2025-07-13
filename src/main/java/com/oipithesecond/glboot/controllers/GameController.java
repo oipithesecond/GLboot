@@ -43,4 +43,18 @@ public class GameController {
                 .map(gameMapper::toDto);
     }
 
+    @PutMapping(path="/{game_id}")
+    public GameDTO updateGame(@PathVariable("game_id") UUID gameId, @RequestBody GameDTO gameDTO) {
+        Game updateGame = gameService.updateGame(
+                gameId,
+                gameMapper.fromDto(gameDTO));
+
+        return gameMapper.toDto(updateGame);
+    }
+
+    @DeleteMapping(path="/{game_id}")
+    public void deleteGame(@PathVariable("game_id") UUID gameId) {
+        gameService.deleteGame(gameId);
+    }
+
 }

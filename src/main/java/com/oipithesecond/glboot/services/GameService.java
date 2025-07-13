@@ -10,4 +10,6 @@ public interface GameService {
     List<Game> listGame();
     Game createGame(Game game);
     Optional<Game> getGame(UUID id);
+    Game updateGame(UUID id, Game game);
+    void deleteGame(UUID id);
 }
