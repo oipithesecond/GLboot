@@ -2,11 +2,10 @@ package com.oipithesecond.glboot.domain.dto;
 
 import java.util.UUID;
 import java.time.LocalDateTime;
-import com.oipithesecond.glboot.domain.entities.Game;
 
 public record SessionDTO(
         UUID id,
-        Game game,
+        UUID gameId,
         LocalDateTime startTime,
         LocalDateTime endTime) {
 
