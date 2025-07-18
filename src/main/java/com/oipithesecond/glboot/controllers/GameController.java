@@ -59,8 +59,9 @@ public class GameController {
     }
 
     @DeleteMapping(path="/{game_id}")
-    public void deleteGame(@PathVariable("game_id") UUID gameId) {
+    public ResponseEntity<Void> deleteGame(@PathVariable("game_id") UUID gameId) {
         gameService.deleteGame(gameId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 }

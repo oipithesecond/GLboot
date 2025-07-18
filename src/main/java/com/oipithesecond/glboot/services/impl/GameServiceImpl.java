@@ -67,6 +67,12 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public void deleteGame(UUID id) {
-        gameRepository.deleteById(id);
+        Optional<Game> game = gameRepository.findById(id);
+        if(game.isPresent()){
+            if(!game.get().getSessions().isEmpty()){
+                throw new IllegalStateException("game has sessions associated with it");
+            }
+            gameRepository.deleteById(id);
+        }
     }
 }
