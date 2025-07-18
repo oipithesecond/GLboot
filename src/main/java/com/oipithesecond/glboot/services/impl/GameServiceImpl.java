@@ -24,6 +24,7 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
+    @Transactional
     public Game createGame(Game game) {
         if(null != game.getId()) {
             throw new IllegalArgumentException("Game already exists");
@@ -32,13 +33,11 @@ public class GameServiceImpl implements GameService {
             throw new IllegalArgumentException("Game title is required");
         }
 
-        return gameRepository.save(new Game(
-                null,
-                game.getTitle(),
-                game.getDescription(),
-                null,
-                null
-        ));
+        if(gameRepository.existsByNameIgnoreCase(game.getTitle())){
+            throw new IllegalArgumentException("Game with same name already exists");
+        }
+
+        return gameRepository.save(game);
     }
 
     @Override

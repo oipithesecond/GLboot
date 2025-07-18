@@ -8,4 +8,6 @@ import java.util.UUID;
 
 @Repository
 public interface GameRepository extends JpaRepository<Game, UUID> {
+
+    boolean existsByNameIgnoreCase(String name);
 }

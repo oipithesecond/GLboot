@@ -1,10 +1,13 @@
 package com.oipithesecond.glboot.controllers;
 
+import com.oipithesecond.glboot.domain.dto.CreateGameRequest;
 import com.oipithesecond.glboot.domain.dto.GameDTO;
 import com.oipithesecond.glboot.domain.entities.Game;
 import com.oipithesecond.glboot.mappers.GameMapper;
 import com.oipithesecond.glboot.services.GameService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,16 +29,18 @@ public class GameController {
                 .stream()
                 .map(gameMapper::toDto)
                 .toList();
-
         return ResponseEntity.ok(games);
-
     }
 
     @PostMapping
-    public GameDTO createGame(@RequestBody GameDTO gameDTO) {
-        Game createdGame = gameService.createGame(
-                gameMapper.fromDto(gameDTO));
-        return gameMapper.toDto(createdGame);
+    public ResponseEntity<GameDTO> createGame(
+            @Valid @RequestBody CreateGameRequest createGameRequest) {
+        Game gameToCreate = gameMapper.toEntity(createGameRequest);
+        Game game = gameService.createGame(gameToCreate);
+        return new ResponseEntity<>(
+                gameMapper.toDto(game),
+                HttpStatus.CREATED
+        );
     }
 
     @GetMapping(path="/{game_id}")
