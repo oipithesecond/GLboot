@@ -4,6 +4,8 @@ import com.oipithesecond.glboot.domain.dto.GameDTO;
 import com.oipithesecond.glboot.domain.entities.Game;
 import com.oipithesecond.glboot.mappers.GameMapper;
 import com.oipithesecond.glboot.services.GameService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,23 +13,22 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RestController
-@RequestMapping(path = "/games")
+@RequestMapping(path = "/api/games")
+@RequiredArgsConstructor
 public class GameController {
 
     private final GameService gameService;
     private final GameMapper gameMapper;
 
-    public GameController(GameService gameService, GameMapper gameMapper) {
-        this.gameService = gameService;
-        this.gameMapper = gameMapper;
-    }
-
     @GetMapping
-    public List<GameDTO> listGame() {
-        return gameService.listGame()
+    public ResponseEntity<List<GameDTO>> listGame() {
+        List<GameDTO> games = gameService.listGame()
                 .stream()
                 .map(gameMapper::toDto)
                 .toList();
+
+        return ResponseEntity.ok(games);
+
     }
 
     @PostMapping

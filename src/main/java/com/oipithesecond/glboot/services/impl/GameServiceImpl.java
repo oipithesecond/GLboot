@@ -3,6 +3,7 @@ package com.oipithesecond.glboot.services.impl;
 import com.oipithesecond.glboot.domain.entities.Game;
 import com.oipithesecond.glboot.repositories.GameRepository;
 import com.oipithesecond.glboot.services.GameService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,13 +13,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class GameServiceImpl implements GameService {
 
     private final GameRepository gameRepository;
-
-    public GameServiceImpl(GameRepository gameRepository) {
-        this.gameRepository = gameRepository;
-    }
 
     @Override
     public List<Game> listGame() {
