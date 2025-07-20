@@ -18,9 +18,3 @@ public class GameDTO{
     private String title;
     private String description;
 }
-
-//        UUID id,
-//        String title,
-//        String description,
-//        SessionStatus status,
-//        List<SessionDTO> sessions

@@ -43,23 +43,24 @@ public class GameController {
         );
     }
 
-    @GetMapping(path="/{game_id}")
-    public Optional<GameDTO> getGame(@PathVariable("game_id") UUID gameId) {
-        return gameService.getGame(gameId)
-                .map(gameMapper::toDto);
+    @GetMapping("/{gameId}")
+    public ResponseEntity<GameDTO> getGameById(@PathVariable("gameId") UUID gameId) {
+        Game game = gameService.getGameById(gameId);
+        GameDTO gameDTO = gameMapper.toDto(game);
+        return ResponseEntity.ok(gameDTO);
     }
 
-    @PutMapping(path="/{game_id}")
-    public GameDTO updateGame(@PathVariable("game_id") UUID gameId, @RequestBody GameDTO gameDTO) {
-        Game updateGame = gameService.updateGame(
-                gameId,
-                gameMapper.fromDto(gameDTO));
-
-        return gameMapper.toDto(updateGame);
+    @PutMapping("/{gameId}")
+    public ResponseEntity<GameDTO> updateGame(
+            @PathVariable("gameId") UUID gameId,
+            @RequestBody GameDTO gameDTO) {
+        Game gameToUpdate = gameMapper.fromDto(gameDTO);
+        Game updatedGame = gameService.updateGame(gameId, gameToUpdate);
+        return ResponseEntity.ok(gameMapper.toDto(updatedGame));
     }
 
-    @DeleteMapping(path="/{game_id}")
-    public ResponseEntity<Void> deleteGame(@PathVariable("game_id") UUID gameId) {
+    @DeleteMapping("/{gameId}")
+    public ResponseEntity<Void> deleteGame(@PathVariable("gameId") UUID gameId) {
         gameService.deleteGame(gameId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

@@ -3,6 +3,7 @@ package com.oipithesecond.glboot.services.impl;
 import com.oipithesecond.glboot.domain.entities.Game;
 import com.oipithesecond.glboot.repositories.GameRepository;
 import com.oipithesecond.glboot.services.GameService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,8 +42,9 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public Optional<Game> getGame(UUID id) {
-        return gameRepository.findById(id);
+    public Game getGameById(UUID id) {
+        return gameRepository.findById(id)
+                .orElseThrow(()-> new EntityNotFoundException("Game with id " + id + " not found"));
     }
 
     @Transactional
@@ -60,7 +62,6 @@ public class GameServiceImpl implements GameService {
 
         existingGame.setTitle(game.getTitle());
         existingGame.setDescription(game.getDescription());
-        existingGame.setStatus(game.getStatus());
 
         return gameRepository.save(existingGame);
     }

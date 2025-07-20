@@ -2,12 +2,18 @@ package com.oipithesecond.glboot.services.impl;
 
 import com.oipithesecond.glboot.domain.entities.Game;
 import com.oipithesecond.glboot.domain.entities.Session;
+import com.oipithesecond.glboot.domain.SessionStatus;
+import com.oipithesecond.glboot.domain.entities.User;
 import com.oipithesecond.glboot.repositories.GameRepository;
 import com.oipithesecond.glboot.repositories.SessionRepository;
+import com.oipithesecond.glboot.repositories.UserRepository;
+import com.oipithesecond.glboot.services.GameService;
 import com.oipithesecond.glboot.services.SessionService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -15,68 +21,84 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class SessionServiceImpl implements SessionService {
 
     private final SessionRepository sessionRepository;
     private final GameRepository gameRepository;
-
-    public SessionServiceImpl(SessionRepository sessionRepository, GameRepository gameRepository) {
-        this.sessionRepository = sessionRepository;
-        this.gameRepository = gameRepository;
-    }
-
-    @Override
-    public List<Session> getSessionsbygameid(UUID gameid) {
-        return sessionRepository.findByGame_Id(gameid);
-    }
+    private final UserRepository userRepository;
 
     @Transactional
     @Override
-    public Session createSession(UUID gameid, Session session) {
-        if(null!= session.getId()){
-            throw new IllegalStateException("session already exists");
-        }
+    public Session createSession(UUID gameId, UUID userId) {
+        Game game = gameRepository.findById(gameId)
+                .orElseThrow(() -> new IllegalStateException("Game with id " + gameId + " not found"));
 
-        Game game = gameRepository.findById(gameid)
-                .orElseThrow(() -> new IllegalStateException("game not found"));
+        User author = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalStateException("User with id " + userId + " not found"));
 
-        LocalDateTime  now = LocalDateTime.now();
-        Session sessionToSave = new Session(
-                null,
-                game,
-                now,
-                now
-        );
+        Session sessionToSave = Session.builder()
+                .game(game)
+                .author(author)
+                .startTime(LocalDateTime.now())
+                .endTime(LocalDateTime.now())
+                .status(SessionStatus.INGAME)
+                .SessionLength(Duration.ZERO)
+                .build();
 
         return sessionRepository.save(sessionToSave);
     }
 
     @Override
-    public Optional<Session> getSession(UUID gameid, UUID id) {
-        return sessionRepository.findByGame_IdAndId(gameid, id);
+    @Transactional(readOnly = true)
+    public Optional<Session> getSessionByUserAndGame(UUID userId, UUID gameId) {
+        return sessionRepository.findByGameIdAndUserId(gameId, userId);
     }
 
-    @Transactional
     @Override
-    public Session updateSession(UUID gameid, UUID id, Session session) {
-        if(null == session.getId()){
-            throw new IllegalStateException("session already exists");
-        }
-        if(!Objects.equals(id,session.getId())){
-            throw new IllegalStateException("session id does not match");
-        }
-        Session existingSession = sessionRepository.findByGame_IdAndId(gameid,id)
-                .orElseThrow(() -> new IllegalStateException("session not found"));
-
-        existingSession.setStartTime(session.getStartTime());
-        existingSession.setEndTime(session.getEndTime());
-
-        return sessionRepository.save(existingSession);
+    @Transactional(readOnly = true)
+    public List<Session> getSessionsByGame(UUID gameId) {
+        return sessionRepository.findByGameId(gameId);
     }
 
-    @Transactional
     @Override
-    public void deleteSession(UUID gameid, UUID id) {
-        sessionRepository.deleteByGame_IdAndId(gameid,id);
+    @Transactional(readOnly = true)
+    public List<Session> getSessionsByUser(UUID userId) {
+        return sessionRepository.findByUserId(userId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<Session> getSessionById(UUID sessionId) {
+        return sessionRepository.findById(sessionId);
+    }
+
+    @Override
+    @Transactional
+    public Optional<Session> endSession(UUID sessionId, UUID userId) {
+        return sessionRepository.findById(sessionId)
+                .map(session -> {
+                    if (!session.getAuthor().getId().equals(userId)) {
+                        throw new SecurityException("User is not authorized to end this session.");
+                    }
+                    if (session.getStatus() == SessionStatus.COMPLETED) {
+                        throw new IllegalStateException("Session is already completed.");
+                    }
+                    session.setStatus(SessionStatus.COMPLETED);
+                    return sessionRepository.save(session);
+                });
+    }
+
+    @Override
+    @Transactional
+    public void deleteSession(UUID sessionId, UUID userId) {
+        Session session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new IllegalStateException("Session with id " + sessionId + " not found."));
+
+        if (!session.getAuthor().getId().equals(userId)) {
+            throw new SecurityException("User is not authorized to delete this session.");
+        }
+
+        sessionRepository.delete(session);
     }
 }

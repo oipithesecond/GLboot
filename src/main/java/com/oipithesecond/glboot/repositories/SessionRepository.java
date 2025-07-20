@@ -11,6 +11,8 @@ import java.util.UUID;
 @Repository
 public interface SessionRepository extends JpaRepository<Session, UUID> {
     List<Session> findByGame_Id(UUID gameId);
-    Optional<Session> findByGame_IdAndId(UUID gameId, UUID Id);
+    Optional<Session> findByGameIdAndUserId(UUID gameId, UUID Id);
+    List<Session> findByGameId(UUID gameId);
+    List<Session> findByUserId(UUID userId);
     void deleteByGame_IdAndId(UUID gameId, UUID id);
 }
