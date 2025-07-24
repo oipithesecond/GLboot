@@ -34,7 +34,7 @@ public class GameServiceImpl implements GameService {
             throw new IllegalArgumentException("Game title is required");
         }
 
-        if(gameRepository.existsByNameIgnoreCase(game.getTitle())){
+        if(gameRepository.existsByTitleIgnoreCase(game.getTitle())){
             throw new IllegalArgumentException("Game with same name already exists");
         }
 

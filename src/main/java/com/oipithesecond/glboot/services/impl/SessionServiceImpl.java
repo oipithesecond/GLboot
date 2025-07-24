@@ -7,7 +7,6 @@ import com.oipithesecond.glboot.domain.entities.User;
 import com.oipithesecond.glboot.repositories.GameRepository;
 import com.oipithesecond.glboot.repositories.SessionRepository;
 import com.oipithesecond.glboot.repositories.UserRepository;
-import com.oipithesecond.glboot.services.GameService;
 import com.oipithesecond.glboot.services.SessionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -52,19 +50,22 @@ public class SessionServiceImpl implements SessionService {
     @Override
     @Transactional(readOnly = true)
     public Optional<Session> getSessionByUserAndGame(UUID userId, UUID gameId) {
-        return sessionRepository.findByGameIdAndUserId(gameId, userId);
+        // CORRECTED: Changed from findByGameIdAndUserId to findByGame_IdAndAuthor_Id
+        return sessionRepository.findByGame_IdAndAuthor_Id(gameId, userId);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<Session> getSessionsByGame(UUID gameId) {
-        return sessionRepository.findByGameId(gameId);
+        // CORRECTED: Changed from findByGameId to findByGame_Id
+        return sessionRepository.findByGame_Id(gameId);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<Session> getSessionsByUser(UUID userId) {
-        return sessionRepository.findByUserId(userId);
+        // CORRECTED: Changed from findByUserId to findByAuthor_Id
+        return sessionRepository.findByAuthor_Id(userId);
     }
 
     @Override
