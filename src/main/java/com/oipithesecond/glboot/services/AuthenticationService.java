@@ -1,9 +1,11 @@
 package com.oipithesecond.glboot.services;
 
+import com.oipithesecond.glboot.domain.dto.AuthResponse;
+import com.oipithesecond.glboot.domain.dto.SignupRequest;
 import org.springframework.security.core.userdetails.UserDetails;
 
 public interface AuthenticationService {
     UserDetails authenticate(String username, String password);
-    String generateToken(UserDetails userDetails);
-    UserDetails validateToken(String token);
+    AuthResponse signup(SignupRequest signupRequest);
+    AuthResponse generateToken(UserDetails userDetails);
 }

@@ -5,6 +5,7 @@ import com.oipithesecond.glboot.repositories.UserRepository;
 import com.oipithesecond.glboot.security.GLUserDetailsService;
 import com.oipithesecond.glboot.security.JwtAuthenticationFilter;
 import com.oipithesecond.glboot.services.AuthenticationService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -27,10 +28,10 @@ import java.time.LocalDateTime;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Bean
-    public JwtAuthenticationFilter jwtAuthenticationFilter(AuthenticationService authenticationService) {
-        return new JwtAuthenticationFilter(authenticationService);
-    }
+//    @Bean
+//    public JwtAuthenticationFilter jwtAuthenticationFilter(AuthenticationService authenticationService) {
+//        return new JwtAuthenticationFilter(authenticationService);
+//    }
 
     @Bean
     public UserDetailsService userDetailsService(
@@ -39,32 +40,32 @@ public class SecurityConfig {
         GLUserDetailsService glUserDetailsService = new GLUserDetailsService(userRepository);
 
         String username = "admin";
-        userRepository.findByUsername(username).orElseGet(() -> {
+        if (userRepository.findByUsername(username).isEmpty()) {
             User newUser = User.builder()
                     .username(username)
-                    .email("123@gmail.com")
+                    .email("admin@example.com")
                     .password(passwordEncoder.encode("password123"))
                     .createdAt(LocalDateTime.now())
                     .lastLogin(LocalDateTime.now())
                     .build();
-            return userRepository.save(newUser);
-        });
+            userRepository.save(newUser);
+        }
         return glUserDetailsService;
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(
-            HttpSecurity http,
-            JwtAuthenticationFilter jwtAuthenticationFilter,
-            AuthenticationProvider authenticationProvider) throws Exception {
+    public SecurityFilterChain securityFilterChain( HttpSecurity http,
+                                                    JwtAuthenticationFilter jwtAuthenticationFilter,
+                                                    AuthenticationProvider authenticationProvider
+    ) throws Exception {
         http
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/signup").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/sessions/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/games/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .csrf(csrf -> csrf.disable())
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )

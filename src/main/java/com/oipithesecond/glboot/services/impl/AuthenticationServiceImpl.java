@@ -1,73 +1,72 @@
 package com.oipithesecond.glboot.services.impl;
 
+import com.oipithesecond.glboot.domain.dto.AuthResponse;
+import com.oipithesecond.glboot.domain.dto.SignupRequest;
+import com.oipithesecond.glboot.domain.entities.User;
+import com.oipithesecond.glboot.repositories.UserRepository;
+import com.oipithesecond.glboot.security.GLUserDetails;
+import com.oipithesecond.glboot.security.JwtService;
 import com.oipithesecond.glboot.services.AuthenticationService;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
-    final private AuthenticationManager authenticationManager;
-    final private UserDetailsService userDetailsService;
 
-    @Value("${jwt.secret}")
-    private String secretKey;
-
-    private final long jwtExpiryMs = 86400000L;
+    private final AuthenticationManager authenticationManager;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService; // Correctly depends on the separate JwtService
 
     @Override
     public UserDetails authenticate(String username, String password) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(username, password)
         );
-        return userDetailsService.loadUserByUsername(username);
+        return userRepository.findByUsername(username)
+                .map(GLUserDetails::new)
+                .orElseThrow(() -> new IllegalStateException("Authenticated user not found"));
     }
 
     @Override
-    public String generateToken(UserDetails userDetails) {
-        Map<String,Object> claims = new HashMap<>();
-        return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(userDetails.getUsername())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiryMs))
-                .signWith(getSigningKey(),SignatureAlgorithm.HS256)
-                .compact();
+    public AuthResponse signup(SignupRequest signupRequest) {
+        if (userRepository.findByUsername(signupRequest.getUsername()).isPresent()) {
+            throw new IllegalArgumentException("Username is already taken.");
+        }
+        if (userRepository.findByEmail(signupRequest.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("Email is already registered.");
+        }
+
+        User newUser = User.builder()
+                .username(signupRequest.getUsername())
+                .email(signupRequest.getEmail())
+                .password(passwordEncoder.encode(signupRequest.getPassword()))
+                .createdAt(LocalDateTime.now())
+                .lastLogin(LocalDateTime.now())
+                .build();
+
+        userRepository.save(newUser);
+        UserDetails userDetails = new GLUserDetails(newUser);
+
+        // This works because generateToken correctly returns an AuthResponse
+        return generateToken(userDetails);
     }
 
     @Override
-    public UserDetails validateToken(String token) {
-        String username = extractUsername(token);
-        return userDetailsService.loadUserByUsername(username);
+    public AuthResponse generateToken(UserDetails userDetails) {
+        String token = jwtService.generateToken(userDetails);
+        long expiresIn = jwtService.getJwtExpiration();
+
+        return AuthResponse.builder()
+                .token(token)
+                .expiresIn(expiresIn)
+                .build();
     }
-
-    private String extractUsername(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-
-        return claims.getSubject();
-    }
-
-    private Key getSigningKey(){
-        byte[] keyBytes = secretKey.getBytes();
-        return Keys.hmacShaKeyFor(keyBytes);
-    }
-
 }
