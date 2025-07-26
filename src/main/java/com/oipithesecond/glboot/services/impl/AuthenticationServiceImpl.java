@@ -21,10 +21,10 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
-    private AuthenticationManager authenticationManager;
-    private UserDetailsService userDetailsService;
+    final private AuthenticationManager authenticationManager;
+    final private UserDetailsService userDetailsService;
 
-    @Value("${jwt.secret")
+    @Value("${jwt.secret}")
     private String secretKey;
 
     private final long jwtExpiryMs = 86400000L;
